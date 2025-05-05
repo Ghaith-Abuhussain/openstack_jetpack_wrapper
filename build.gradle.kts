@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "org.example"
@@ -49,6 +50,9 @@ compose.desktop {
         mainClass = "MainKt"
 
         nativeDistributions {
+            windows{
+                includeAllModules = true
+            }
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
             packageName = "openstack_wrapper_compose"
             packageVersion = "1.0.0"
@@ -56,3 +60,18 @@ compose.desktop {
         }
     }
 }
+
+tasks {
+    shadowJar {
+        archiveClassifier.set("") // So it produces projectname-version.jar (no "-all")
+        manifest {
+            attributes["Main-Class"] = "MainKt" // <-- update to your main class
+        }
+        mergeServiceFiles()
+    }
+
+    build {
+        dependsOn(shadowJar)
+    }
+}
+
